@@ -1,20 +1,11 @@
 /*
  * Copyright (C) 2023 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licencia Apache 2.0: Permite el uso, modificación y distribución del código bajo ciertas condiciones.
  */
 package com.example.cupcake.ui
 
+// Importaciones necesarias para crear interfaces con Jetpack Compose
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,10 +33,15 @@ import com.example.cupcake.ui.components.FormattedPriceLabel
 import com.example.cupcake.ui.theme.CupcakeTheme
 
 /**
- * Composable that displays the list of items as [RadioButton] options,
- * [onSelectionChanged] lambda that notifies the parent composable when a new value is selected,
- * [onCancelButtonClicked] lambda that cancels the order when user clicks cancel and
- * [onNextButtonClicked] lambda that triggers the navigation to next screen
+ * Pantalla de selección de opciones con botones de radio.
+ *
+ * Parámetros:
+ * - [subtotal]: precio actual mostrado al usuario.
+ * - [options]: lista de opciones disponibles (por ejemplo: sabores o fechas).
+ * - [onSelectionChanged]: callback que se ejecuta cuando el usuario selecciona una opción.
+ * - [onCancelButtonClicked]: callback al hacer clic en "Cancelar".
+ * - [onNextButtonClicked]: callback al hacer clic en "Siguiente".
+ * - [modifier]: modificador opcional para la personalización del diseño.
  */
 @Composable
 fun SelectOptionScreen(
@@ -56,13 +52,17 @@ fun SelectOptionScreen(
     onNextButtonClicked: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    // Estado para guardar cuál opción ha sido seleccionada por el usuario
     var selectedValue by rememberSaveable { mutableStateOf("") }
 
+    // Diseño principal en columna, con espacio entre la sección de opciones y los botones
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+        // Columna para mostrar todas las opciones disponibles
         Column(modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))) {
+            // Por cada opción, se crea un elemento con botón de radio y texto
             options.forEach { item ->
                 Row(
                     modifier = Modifier.selectable(
@@ -74,6 +74,7 @@ fun SelectOptionScreen(
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Botón de radio que se activa si la opción está seleccionada
                     RadioButton(
                         selected = selectedValue == item,
                         onClick = {
@@ -84,10 +85,14 @@ fun SelectOptionScreen(
                     Text(item)
                 }
             }
+
+            // Línea divisoria entre las opciones y el precio
             Divider(
                 thickness = dimensionResource(R.dimen.thickness_divider),
                 modifier = Modifier.padding(bottom = dimensionResource(R.dimen.padding_medium))
             )
+
+            // Componente personalizado que muestra el subtotal alineado a la derecha
             FormattedPriceLabel(
                 subtotal = subtotal,
                 modifier = Modifier
@@ -98,6 +103,8 @@ fun SelectOptionScreen(
                     )
             )
         }
+
+        // Fila inferior con botones de acción
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,15 +112,17 @@ fun SelectOptionScreen(
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium)),
             verticalAlignment = Alignment.Bottom
         ) {
+            // Botón para cancelar la orden
             OutlinedButton(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f), // Ambos botones ocupan el mismo ancho
                 onClick = onCancelButtonClicked
             ) {
                 Text(stringResource(R.string.cancel))
             }
+
+            // Botón para continuar (solo habilitado si se seleccionó una opción)
             Button(
                 modifier = Modifier.weight(1f),
-                // the button is enabled when the user makes a selection
                 enabled = selectedValue.isNotEmpty(),
                 onClick = onNextButtonClicked
             ) {
@@ -121,9 +130,12 @@ fun SelectOptionScreen(
             }
         }
     }
-
 }
 
+/**
+ * Vista previa de la pantalla de selección de opciones.
+ * Útil para verificar visualmente cómo se verá la pantalla en Android Studio.
+ */
 @Preview
 @Composable
 fun SelectOptionPreview() {

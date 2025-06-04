@@ -1,32 +1,13 @@
 /*
  * Copyright (C) 2023 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licencia Apache 2.0: Permite el uso, modificación y distribución del código bajo condiciones específicas.
  */
 package com.example.cupcake.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+// Importaciones necesarias para UI con Jetpack Compose y recursos
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,9 +22,14 @@ import com.example.cupcake.ui.components.FormattedPriceLabel
 import com.example.cupcake.ui.theme.CupcakeTheme
 
 /**
- * This composable expects [orderUiState] that represents the order state, [onCancelButtonClicked]
- * lambda that triggers canceling the order and passes the final order to [onSendButtonClicked]
- * lambda
+ * Pantalla de resumen del pedido.
+ *
+ * Muestra los detalles del pedido, incluyendo cantidad, sabor, fecha de recogida y precio.
+ *
+ * Parámetros:
+ * - [orderUiState]: estado actual del pedido (datos seleccionados).
+ * - [onCancelButtonClicked]: función que se ejecuta al cancelar el pedido.
+ * - [onSendButtonClicked]: función que se ejecuta al compartir el pedido.
  */
 @Composable
 fun OrderSummaryScreen(
@@ -52,14 +38,17 @@ fun OrderSummaryScreen(
     onSendButtonClicked: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Accede a los recursos del contexto actual (necesario para obtener strings plurales, etc.)
     val resources = LocalContext.current.resources
 
+    // Obtiene la cadena correspondiente a la cantidad de cupcakes, considerando pluralización
     val numberOfCupcakes = resources.getQuantityString(
         R.plurals.cupcakes,
         orderUiState.quantity,
         orderUiState.quantity
     )
-    //Load and format a string resource with the parameters.
+
+    // Construye el resumen del pedido como texto formateado con los datos del estado
     val orderSummary = stringResource(
         R.string.order_details,
         numberOfCupcakes,
@@ -67,48 +56,60 @@ fun OrderSummaryScreen(
         orderUiState.date,
         orderUiState.quantity
     )
+
+    // Título del mensaje a enviar
     val newOrder = stringResource(R.string.new_cupcake_order)
-    //Create a list of order summary to display
+
+    // Lista con los datos clave del pedido para mostrar en la UI
     val items = listOf(
-        // Summary line 1: display selected quantity
         Pair(stringResource(R.string.quantity), numberOfCupcakes),
-        // Summary line 2: display selected flavor
         Pair(stringResource(R.string.flavor), orderUiState.flavor),
-        // Summary line 3: display selected pickup date
         Pair(stringResource(R.string.pickup_date), orderUiState.date)
     )
 
+    // Diseño principal en columna
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceBetween // Espaciado entre contenido y botones
     ) {
+        // Sección superior: muestra la información del pedido
         Column(
             modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small))
         ) {
+            // Recorre cada par de datos y los muestra en pantalla
             items.forEach { item ->
-                Text(item.first.uppercase())
-                Text(text = item.second, fontWeight = FontWeight.Bold)
-                Divider(thickness = dimensionResource(R.dimen.thickness_divider))
+                Text(item.first.uppercase()) // Título (cantidad, sabor, etc.)
+                Text(text = item.second, fontWeight = FontWeight.Bold) // Valor
+                Divider(thickness = dimensionResource(R.dimen.thickness_divider)) // Separador
             }
+
+            // Espacio antes del precio
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_small)))
+
+            // Muestra el precio formateado en la esquina inferior derecha
             FormattedPriceLabel(
                 subtotal = orderUiState.price,
                 modifier = Modifier.align(Alignment.End)
             )
         }
+
+        // Sección inferior: botones para enviar o cancelar
         Row(
             modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small))
             ) {
+                // Botón para enviar pedido (comparte los detalles)
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { onSendButtonClicked(newOrder, orderSummary) }
                 ) {
                     Text(stringResource(R.string.send))
                 }
+
+                // Botón para cancelar el pedido
                 OutlinedButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onCancelButtonClicked
@@ -120,6 +121,9 @@ fun OrderSummaryScreen(
     }
 }
 
+/**
+ * Vista previa del resumen del pedido (usado en el diseño para testeo visual)
+ */
 @Preview
 @Composable
 fun OrderSummaryPreview() {

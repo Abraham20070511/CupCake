@@ -1,18 +1,9 @@
 /*
  * Copyright (C) 2023 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licencia Apache 2.0
  */
+
 package com.example.cupcake
 
 import android.content.Context
@@ -25,26 +16,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
+
 import com.example.cupcake.data.DataSource
 import com.example.cupcake.data.OrderUiState
 import com.example.cupcake.ui.OrderSummaryScreen
@@ -52,9 +33,7 @@ import com.example.cupcake.ui.OrderViewModel
 import com.example.cupcake.ui.SelectOptionScreen
 import com.example.cupcake.ui.StartOrderScreen
 
-/**
- * enum values that represent the screens in the app
- */
+// Enum que representa las diferentes pantallas de la app y su título correspondiente
 enum class CupcakeScreen(@StringRes val title: Int) {
     Start(title = R.string.app_name),
     Flavor(title = R.string.choose_flavor),
@@ -62,9 +41,7 @@ enum class CupcakeScreen(@StringRes val title: Int) {
     Summary(title = R.string.order_summary)
 }
 
-/**
- * Composable that displays the topBar and displays back button if back navigation is possible.
- */
+// Composable que muestra la AppBar superior con un botón de regreso si se puede navegar hacia atrás
 @Composable
 fun CupcakeAppBar(
     currentScreen: CupcakeScreen,
@@ -91,18 +68,19 @@ fun CupcakeAppBar(
     )
 }
 
+// Composable principal de la app Cupcake que gestiona la navegación entre pantallas
 @Composable
 fun CupcakeApp(
-    viewModel: OrderViewModel = viewModel(),
-    navController: NavHostController = rememberNavController()
+    viewModel: OrderViewModel = viewModel(),  // ViewModel que contiene el estado de la orden
+    navController: NavHostController = rememberNavController() // Controlador de navegación
 ) {
-    // Get current back stack entry
+    // Obtenemos la pantalla actual desde la pila de navegación
     val backStackEntry by navController.currentBackStackEntryAsState()
-    // Get the name of the current screen
     val currentScreen = CupcakeScreen.valueOf(
         backStackEntry?.destination?.route ?: CupcakeScreen.Start.name
     )
 
+    // Scaffold contiene la estructura visual principal con AppBar y contenido
     Scaffold(
         topBar = {
             CupcakeAppBar(
@@ -112,21 +90,24 @@ fun CupcakeApp(
             )
         }
     ) { innerPadding ->
+        // Obtenemos el estado actual de la UI desde el ViewModel
         val uiState by viewModel.uiState.collectAsState()
 
+        // Configuramos la navegación con NavHost
         NavHost(
             navController = navController,
             startDestination = CupcakeScreen.Start.name,
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()) // Hace que toda la pantalla sea desplazable
                 .padding(innerPadding)
         ) {
+            // Pantalla de inicio: selección de cantidad
             composable(route = CupcakeScreen.Start.name) {
                 StartOrderScreen(
                     quantityOptions = DataSource.quantityOptions,
                     onNextButtonClicked = {
-                        viewModel.setQuantity(it)
+                        viewModel.setQuantity(it) // Guarda cantidad en el estado
                         navController.navigate(CupcakeScreen.Flavor.name)
                     },
                     modifier = Modifier
@@ -134,6 +115,8 @@ fun CupcakeApp(
                         .padding(dimensionResource(R.dimen.padding_medium))
                 )
             }
+
+            // Pantalla para elegir el sabor
             composable(route = CupcakeScreen.Flavor.name) {
                 val context = LocalContext.current
                 SelectOptionScreen(
@@ -147,6 +130,8 @@ fun CupcakeApp(
                     modifier = Modifier.fillMaxHeight()
                 )
             }
+
+            // Pantalla para elegir la fecha de recogida
             composable(route = CupcakeScreen.Pickup.name) {
                 SelectOptionScreen(
                     subtotal = uiState.price,
@@ -159,6 +144,8 @@ fun CupcakeApp(
                     modifier = Modifier.fillMaxHeight()
                 )
             }
+
+            // Pantalla final de resumen del pedido
             composable(route = CupcakeScreen.Summary.name) {
                 val context = LocalContext.current
                 OrderSummaryScreen(
@@ -176,9 +163,7 @@ fun CupcakeApp(
     }
 }
 
-/**
- * Resets the [OrderUiState] and pops up to [CupcakeScreen.Start]
- */
+// Función que cancela el pedido y regresa a la pantalla inicial
 private fun cancelOrderAndNavigateToStart(
     viewModel: OrderViewModel,
     navController: NavHostController
@@ -187,11 +172,8 @@ private fun cancelOrderAndNavigateToStart(
     navController.popBackStack(CupcakeScreen.Start.name, inclusive = false)
 }
 
-/**
- * Creates an intent to share order details
- */
+// Función que crea un intent implícito para compartir el pedido
 private fun shareOrder(context: Context, subject: String, summary: String) {
-    // Create an ACTION_SEND implicit intent with order details in the intent extras
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_SUBJECT, subject)
